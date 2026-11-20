@@ -4,6 +4,8 @@
 
 ShrinkZIP reads an archive from its tail inward and **cuts the archive file down as each part is safely extracted**, so the space it frees is reused by the extracted files. You need room for the extracted data, not for the archive *plus* the extracted data.
 
+Inspired by [HatchZip](https://github.com/xevrion/hatchzip) (Rust, MIT OR Apache-2.0). ShrinkZIP is an **independent Python implementation of the same public design**: no HatchZip code is copied. HatchZip is the more complete tool (see [Compared with HatchZip](#compared-with-hatchzip)).
+
 [![Python: 3.10+](https://img.shields.io/badge/Python-3.10%2B-brightgreen.svg)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
@@ -74,12 +76,9 @@ Test suite: 44 tests (`python -m pytest`), including `kill -9` at random moments
 
 **Not verified yet:** Windows (the CI workflow runs the tests there; check it before trusting Windows behaviour), macOS, RAR 4 creation (the installed `rar` cannot make RAR 4 files, so RAR 4 is simply refused in place), and the built `.exe` itself.
 
-## Known limitations
+## Compared with HatchZip
 
-* No freeing of space *inside* a single huge file: the biggest file (or 7z solid block) must fit completely before its archive bytes are released.
-* No in-place `.tar.gz` / `.tar.bz2` / `.tar.xz`, RAR 4, solid RAR, RAR volume sets or password-protected archives (these use normal extraction or are refused).
-* A paused 7z can only be continued by ShrinkZIP itself.
-* Windows, macOS and the built `.exe` are not yet verified (see above).
+HatchZip additionally has: parallel decoding, **freeing space inside one huge file** (hole punching), in-place `.tar.gz`, RAR 4 / volume sets / encrypted archives, password support, a restore that rebuilds a valid 7z, macOS + Linux builds, a CLI, signed releases and a much larger test and fuzz suite. If you need any of that, use HatchZip. ShrinkZIP is a small, readable Python GUI built on the same idea.
 
 ## Install and run
 
@@ -96,21 +95,11 @@ python shrink_unzip_gui.py
 
 RAR needs a `7z` binary (7-Zip) on the machine or bundled in the exe.
 
-## Download (for users)
+## Build the exe
 
-Open the **[Releases](../../releases)** page and download one of:
+**Easiest: GitHub Actions.** Push the repo, open **Actions → build-exe → Run workflow**, then download `ShrinkUnzip-windows` from the run's *Artifacts*. Push a tag (`git tag v2.2 && git push --tags`) to also publish it as a Release. The workflow runs the tests first and bundles 7-Zip.
 
-* **`ShrinkZIP-Setup.exe`**: installer (Start-menu shortcut, uninstaller, no admin rights needed)
-* **`ShrinkUnzip.exe`**: portable, just double-click
-
-Windows may show a "Windows protected your PC" (SmartScreen) warning because the exe is not code-signed. Click **More info → Run anyway**. You can compare the file's SHA-256 with the one on the release page.
-
-## Build and publish (for you)
-
-**GitHub Actions (recommended):** push the repo, then publish a release with
-`git tag v2.2 && git push --tags`. The **build-exe** workflow runs the tests, builds `ShrinkUnzip.exe` and `ShrinkZIP-Setup.exe`, and attaches both to a new Release. You can also run it by hand from **Actions → build-exe → Run workflow** and download the files from the run's *Artifacts*.
-
-**On your PC:** install Python 3.10+ and double-click `build.bat` → `dist\ShrinkUnzip.exe`. For the installer, install [Inno Setup](https://jrsoftware.org/isinfo.php) and compile `installer/ShrinkZIP.iss`.
+**On your PC:** install Python 3.10+, double-click `build.bat`. Output: `dist\ShrinkUnzip.exe`.
 
 Optional files next to the spec are bundled when present: `app_icon.ico`, `7z.exe`, `7z.dll`. If you bundle 7-Zip, ship its license (LGPL, with the unRAR restriction) with your release.
 
@@ -118,13 +107,13 @@ Optional files next to the spec are bundled when present: `app_icon.ico`, `7z.ex
 
 * `shrinkzip_engine.py`: the engine (no GUI code)
 * `shrink_unzip_gui.py`: the customtkinter GUI
-* `installer/`: Inno Setup script for `ShrinkZIP-Setup.exe`
 * `tests/`: pytest suite
 
 ## Credits
 
 * **Created & designed by:** Arman Ahmed
 * **Polished & assisted by:** Claude
+* Design ideas (end-first extraction, saved tail/index, fsync-before-cut, replay planner, split volumes as one logical file): [HatchZip](https://github.com/xevrion/hatchzip)
 
 ## License
 

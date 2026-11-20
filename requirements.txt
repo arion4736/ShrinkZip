@@ -1,0 +1,4 @@
+customtkinter>=5.2
+pillow
+py7zr          # needed for in-place 7z
+rarfile        # optional: fallback when no 7z binary exists

@@ -1,5 +1,5 @@
 @echo off
-REM Builds dist\ShrinkUnzip.exe on Windows. Requires Python 3.10+ from python.org.
+REM Builds dist\ShrinkZip.exe on Windows. Requires Python 3.10+ from python.org.
 setlocal
 python -m pip install --upgrade pip || goto :fail
 python -m pip install customtkinter pillow py7zr pyinstaller pytest || goto :fail
@@ -17,7 +17,7 @@ if exist "C:\Program Files\7-Zip\7z.exe" (
 
 python -m PyInstaller --clean shrink_unzip_gui.spec || goto :fail
 echo.
-echo Done: dist\ShrinkUnzip.exe
+echo Done: dist\ShrinkZip.exe
 goto :eof
 :fail
 echo.

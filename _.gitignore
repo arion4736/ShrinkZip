@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+build/
+dist/
+*.shrinkzip
+*.shrinkzip.tmp
+*.shrinkzip.restore
+.pytest_cache/
+# Ship the .exe through GitHub Releases, not the repository
+*.exe
+!7z.exe
+*.shrinkzip-list.tmp
+dist-test/
+build-test/

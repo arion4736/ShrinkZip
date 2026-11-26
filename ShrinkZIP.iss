@@ -1,6 +1,6 @@
-; Inno Setup script - builds dist\ShrinkZIP-Setup.exe from dist\ShrinkUnzip.exe
+; Inno Setup script - builds dist\ShrinkZIP-Setup.exe from dist\ShrinkZip.exe
 #define MyAppName "ShrinkZIP"
-#define MyAppExe "ShrinkUnzip.exe"
+#define MyAppExe "ShrinkZip.exe"
 #define MyAppVersion GetEnv("APP_VERSION")
 #if MyAppVersion == ""
   #define MyAppVersion "2.2"

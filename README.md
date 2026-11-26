@@ -72,7 +72,7 @@ Linux, Python 3.12, local SSD, 60 files × 5 MB of incompressible data (300 MB a
 
 Test suite: 44 tests (`python -m pytest`), including `kill -9` at random moments followed by a resume and a byte-for-byte comparison, for **ZIP, tar, 7z, RAR and split ZIP**. The GUI was smoke-tested under a virtual display for every format.
 
-**Not verified yet:** Windows (the CI workflow runs the tests there; check it before trusting Windows behaviour), macOS, RAR 4 creation (the installed `rar` cannot make RAR 4 files, so RAR 4 is simply refused in place), and the built `.exe` itself.
+**Not verified yet:** Windows (the CI workflow runs the tests there; check it before trusting Windows behaviour), macOS, RAR 4 creation (the installed `rar` cannot make RAR 4 files, so RAR 4 is simply refused in place), and the first run of the Windows build workflow.
 
 ## Known limitations
 
@@ -83,7 +83,7 @@ Test suite: 44 tests (`python -m pytest`), including `kill -9` at random moments
 
 ## Install and run
 
-**Portable exe:** download `ShrinkUnzip.exe` from the [Releases](../../releases) page (Windows 10/11).
+**Portable exe:** download `ShrinkZip.exe` from the [Releases](../../releases) page (Windows 10/11).
 
 **From source:**
 
@@ -98,27 +98,40 @@ RAR needs a `7z` binary (7-Zip) on the machine or bundled in the exe.
 
 ## Download (for users)
 
-Open the **[Releases](../../releases)** page and download one of:
+Open the **[Releases](../../releases)** page and download **`ShrinkZip.exe`**, then double-click it. No installation is needed (Windows 10/11, 64-bit). Optionally compare the file with `ShrinkZip.exe.sha256` from the same release.
 
-* **`ShrinkZIP-Setup.exe`**: installer (Start-menu shortcut, uninstaller, no admin rights needed)
-* **`ShrinkUnzip.exe`**: portable, just double-click
+Windows may show a "Windows protected your PC" (SmartScreen) warning because the exe is not code-signed. Click **More info → Run anyway**.
 
-Windows may show a "Windows protected your PC" (SmartScreen) warning because the exe is not code-signed. Click **More info → Run anyway**. You can compare the file's SHA-256 with the one on the release page.
+## Automated builds (for you)
 
-## Build and publish (for you)
+The workflow `.github/workflows/build-windows-exe.yml` runs on a Windows runner and:
 
-**GitHub Actions (recommended):** push the repo, then publish a release with
-`git tag v2.2 && git push --tags`. The **build-exe** workflow runs the tests, builds `ShrinkUnzip.exe` and `ShrinkZIP-Setup.exe`, and attaches both to a new Release. You can also run it by hand from **Actions → build-exe → Run workflow** and download the files from the run's *Artifacts*.
+1. detects the project (Python + customtkinter, dependencies from `requirements.txt`),
+2. runs the unit tests,
+3. bundles 7-Zip (`7z.exe`, `7z.dll`) and builds **`dist/ShrinkZip.exe`** with PyInstaller (`shrink_unzip_gui.spec`),
+4. builds a second, console **self-test** executable from the same spec and runs it: it extracts real ZIP, tar, 7z and split archives from inside the frozen build,
+5. launches the real `ShrinkZip.exe` and fails if it crashes at startup,
+6. uploads `ShrinkZip.exe` (+ SHA-256 and the 7-Zip license) as a **workflow artifact** on every run, and
+7. **publishes a GitHub Release** when you push a version tag.
 
-**On your PC:** install Python 3.10+ and double-click `build.bat` → `dist\ShrinkUnzip.exe`. For the installer, install [Inno Setup](https://jrsoftware.org/isinfo.php) and compile `installer/ShrinkZIP.iss`.
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
 
-Optional files next to the spec are bundled when present: `app_icon.ico`, `7z.exe`, `7z.dll`. If you bundle 7-Zip, ship its license (LGPL, with the unRAR restriction) with your release.
+Normal pushes and pull requests only produce the artifact (Actions → the run → *Artifacts*). Tags must look like `v1.0.0`; unit tests block the release on tags. You can also start a build by hand from **Actions → Build Windows EXE → Run workflow**.
+
+**Locally:** install Python 3.10+ and double-click `build.bat` (output `dist\ShrinkZip.exe`). An optional installer script is in `installer/ShrinkZIP.iss` (compile it with [Inno Setup](https://jrsoftware.org/isinfo.php); it is not part of the automated build).
+
+Optional files next to the spec are bundled when present: `app_icon.ico`, `7z.exe`, `7z.dll`. If you bundle 7-Zip, ship its license (LGPL, with the unRAR restriction); the workflow attaches it to every release.
 
 ## Project layout
 
 * `shrinkzip_engine.py`: the engine (no GUI code)
 * `shrink_unzip_gui.py`: the customtkinter GUI
-* `installer/`: Inno Setup script for `ShrinkZIP-Setup.exe`
+* `installer/`: optional Inno Setup script
+* `.github/workflows/`: Windows build + release, and cross-platform tests
+* `.github/ci/selftest.py`: self-test that runs inside the frozen build
 * `tests/`: pytest suite
 
 ## Credits

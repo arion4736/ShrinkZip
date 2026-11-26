@@ -4,16 +4,11 @@
 # Created & Designed by: Arman Ahmed
 # Polished & assisted by: Claude
 #
-# Design ideas (units freed from the END of the archive, saved index/tail,
-# fsync-before-cut, replay planner, split volumes joined into one logical file)
-# follow the public design of HatchZip (https://github.com/xevrion/hatchzip,
-# MIT OR Apache-2.0). This is an independent Python implementation.
-#
 #  Format        In place?   Unit that is freed at once
 #  ZIP / ZIP64   yes         one entry
 #  tar           yes         one entry (incl. long-name / pax records)
-#  7z            yes         one solid block (default 7-Zip settings = 1 block)
-#  RAR 4 / 5     yes*        one file     (*non-solid, single volume)
+#  7z            yes         one solid block (a single giant block saves nothing)
+#  RAR 5         yes*        one file     (*non-solid, single volume; RAR 4 not in place)
 #  split .001..  yes         any of the above, volumes deleted as they empty
 #  tar.gz etc.   no          compressed streams cannot be cut from the end
 # ==============================================================================

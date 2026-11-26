@@ -1,0 +1,23 @@
+name: tests
+on: [push, pull_request]
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.10", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install 7-Zip, tar and RAR (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full tar
+          sudo apt-get install -y rar || echo "rar not available, RAR tests will be skipped"
+      - run: pip install pytest py7zr
+      - run: python -m pytest -q
